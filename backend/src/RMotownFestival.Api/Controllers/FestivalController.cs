@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
+using RMotownFestival.Api.DAL;
 using RMotownFestival.Api.Data;
 using RMotownFestival.Api.Domain;
 
@@ -13,6 +14,12 @@ namespace RMotownFestival.Api.Controllers
     [ApiController]
     public class FestivalController : ControllerBase
     {
+        public MotownDbContext MotownDbContext { get; }
+        public FestivalController(MotownDbContext motownDbContext)
+        {
+            MotownDbContext = motownDbContext;
+        }
+
         [HttpGet("LineUp")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Schedule))]
         public ActionResult GetLineUp()
@@ -22,16 +29,18 @@ namespace RMotownFestival.Api.Controllers
 
         [HttpGet("Artists")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Artist>))]
-        public ActionResult GetArtists()
+        public async Task<ActionResult> GetArtistsAsync()
         {
-            return Ok(FestivalDataSource.Current.Artists);
+            List<Artist> artists = await MotownDbContext.Artists.ToListAsync();
+            return Ok(artists);
         }
 
         [HttpGet("Stages")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Stage>))]
-        public ActionResult GetStages()
+        public async Task<ActionResult> GetStagesAsync()
         {
-            return Ok(FestivalDataSource.Current.Stages);
+            List<Stage> stages = await MotownDbContext.Stages.ToListAsync();
+            return Ok(stages);
         }
 
         [HttpPost("Favorite")]
